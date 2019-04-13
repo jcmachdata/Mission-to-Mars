@@ -10,20 +10,70 @@
 </head>
 
 <body>
-  <div class="container text-center">
+    <!-- Display main banner and web scraping button-->
+    <div class="container text-center">
     <div class="jumbotron text-center">
          <h1><b>Mission to Mars</b></h1>
          <p><a class="btn btn-primary btn-lg" href="/scrape" role="button">Scrape New Data</a></p>
         </div>
-        
-    <div>
-
-        <!-- @TODO: write a for loop that lists out your data and accesses the values using dot notation.
-      {{% for p in produce}}
-      <li>{{p.type}} costs {{p.cost}}</li>
-      {{% endfor %}}
     </div>
-  </div> -->
+
+     <!--Display latest Mars news and featured image-->   
+    <div class="container">
+            <h3>Latest Mars News</h3>
+            <h5>{{ mars.news_title }}</h5>
+            <p>{{ mars.news_p }}</p>
+    </div>
+
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-md-8 col-sm-12">
+                    <h3>Featured Mars Image</h3>
+                    <img src="{{ mars.featured_img_url }}" style="max-width:100%; max-height: 100%;" alt="Mars Featured Image">
+                </div>
+
+                <!--Display latest Mars weather -->
+                <div class="col-lg-4 col-md-4 col-sm-12">
+
+                    <div class="card" style="width: 18rem;">
+                        <div class="card-body">
+                            <h6 class="card-title">Current Weather on Mars</h6>
+                            <p class="card-text">{{ mars.weather_tweet }}</p>
+                        </div>
+
+                    </div>
+
+                    <!-- Display Mars facts -->
+                    <br>
+                    <h3>Mars Facts</h3>
+                    <div style="max-width: 450px; max-height: 150px; font-size: 15px; margin-bottom: 65px;">
+                        {{ mars.tables|safe}}
+                    </div>
+                </div> 
+            </div>
+        </div>
+
+     <!-- Display Mars hemispheres -->   
+    <h3 style="margin-top: 40px; margin-bottom:20px; text-align: center;">Mars Hemispheres</h3>
+    <div class="card-deck">
+        <hr>
+        <div class="col-md-12">
+            <div class="row">
+             {% for hemisphere_images in mars.hemisphere_images %}
+                <div class="col-md-6">
+                    <div class="card text" style="margin-top:20px; margin-right: 100px; margin-left: 100px; padding:30px;">
+                        <img class="card-img-top" src="{{hemisphere_images.img_url}}">
+                        <div class="card-body">
+                            <strong><p class="card-text">{{ hemisphere_images.title }}</p></strong>
+                        </div>
+                    </div>
+                </div>
+             {% endfor %}
+            </div>
+        </div>
+    </div>
+
+       
 </body>
 
 </html>

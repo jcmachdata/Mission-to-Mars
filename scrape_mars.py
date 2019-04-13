@@ -11,6 +11,7 @@ def init_browser():
     executable_path = {'executable_path': 'C:/Users/chamb/Documents/chromedriver.exe'}
     return Browser('chrome', **executable_path, headless=False)
 
+#define Mars data scraping function
 def scrape():
     browser = init_browser()
 
@@ -29,11 +30,9 @@ def scrape():
     news_title = soup.find('div', class_="content_title").text
     mars_data['news_title'] = news_title
 
-
     #find latest paragraph
     news_p = soup.find('div', class_="rollover_description_inner").text
     mars_data['news_p'] = news_p
-
     
     #get JPL featured image
     url_jpl = 'https://www.jpl.nasa.gov/spaceimages/?search=&category=Mars'
@@ -65,7 +64,7 @@ def scrape():
 
     #only get latest tweet that mentions weather-related items
     for tweet in tweets: 
-        weather_tweet = tweet.find('p').text
+        weather_tweet = tweet.find('p').text.replace('\n',' ').split('pic')[0]
         if 'Sol' and 'winds' and 'pressure' in weather_tweet:
             mars_data['weather_tweet']=weather_tweet
             break
@@ -76,11 +75,13 @@ def scrape():
     url = 'https://space-facts.com/mars/'
 
     tables = pd.read_html(url)
-    mars_data['tables']=tables
-
+    
     #convert to pandas dataframe
-    #df = tables[0]
-    #df.columns = ['Attribute','Value']
+    df = tables[0]
+    df.columns = ['Attribute','Value']
+
+    #convert table back to html
+    mars_data['tables']=df.to_html(index=False)
 
     #define main url of site pertaining to the hemispheres of Mars
     main_url = 'https://astrogeology.usgs.gov'
@@ -120,7 +121,7 @@ def scrape():
         img_url = main_url + partial_img_url
 
         #append hemisphere title and image url to list
-        hemisphere_images.append({"title":title,"img_url=":img_url})
+        hemisphere_images.append({"title":title,"img_url":img_url})
 
     mars_data['hemisphere_images']=hemisphere_images
 
