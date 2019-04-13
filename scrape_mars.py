@@ -53,128 +53,80 @@ def scrape():
     mars_data['featured_img_url']=featured_img_url
 
 
+    #retrieve Mars weather from twitter account
+    url_weather = "https://twitter.com/marswxreport?lang=en"
+    browser.visit(url_weather)
 
+    html_weather = browser.html
+    soup = bs(html_weather, "html.parser")
 
-#retrieve Mars weather from twitter account
-url_weather = "https://twitter.com/marswxreport?lang=en"
-browser.visit(url_weather)
+    #get latest tweets
+    tweets = soup.find_all('div', class_='js-tweet-text-container')
 
+    #only get latest tweet that mentions weather-related items
+    for tweet in tweets: 
+        weather_tweet = tweet.find('p').text
+        if 'Sol' and 'winds' and 'pressure' in weather_tweet:
+            mars_data['weather_tweet']=weather_tweet
+            break
+        else: 
+            pass
 
-# In[54]:
+    #use pandas to scrape tabular data from mars facts site
+    url = 'https://space-facts.com/mars/'
 
+    tables = pd.read_html(url)
+    mars_data['tables']=tables
 
-html_weather = browser.html
-soup = bs(html_weather, "html.parser")
+    #convert to pandas dataframe
+    #df = tables[0]
+    #df.columns = ['Attribute','Value']
 
+    #define main url of site pertaining to the hemispheres of Mars
+    main_url = 'https://astrogeology.usgs.gov'
 
-# In[56]:
-
-
-#get latest tweets
-tweets = soup.find_all('div', class_='js-tweet-text-container')
-
-#only get latest tweet that mentions weather-related items
-for tweet in tweets: 
-    weather_tweet = tweet.find('p').text
-    if 'Sol' and 'winds' and 'pressure' in weather_tweet:
-        print(weather_tweet)
-        break
-    else: 
-        pass
-
-
-# In[58]:
-
-
-#use pandas to scrape tabular data from mars facts site
-url = 'https://space-facts.com/mars/'
-
-
-# In[60]:
-
-
-tables = pd.read_html(url)
-
-
-# In[61]:
-
-
-tables
-
-
-# In[63]:
-
-
-#convert to pandas dataframe
-df = tables[0]
-df.columns = ['Attribute','Value']
-
-
-# In[64]:
-
-
-df
-
-
-# In[127]:
-
-
-#define main url of site pertaining to the hemispheres of Mars
-main_url = 'https://astrogeology.usgs.gov'
-
-
-# In[151]:
-
-
-#navigate to page on Mars hemispheres
-url_hem = 'https://astrogeology.usgs.gov/search/results?q=hemisphere+enhanced&k1=target&v1=Mars'
-browser.visit(url_hem)
-    
-html_hemispheres = browser.html
-soup = bs(html_hemispheres, 'html.parser')
-
-#create list of hemisphere titles
-items = soup.find_all('div', class_='item')
-
-
-# In[152]:
-
-
-#create empty list to hold hemisphere title and image url
-hemisphere_images = []
-
-#loop over hemispheres and save the titles and image links
-for item in items:
+    #navigate to page on Mars hemispheres
     url_hem = 'https://astrogeology.usgs.gov/search/results?q=hemisphere+enhanced&k1=target&v1=Mars'
     browser.visit(url_hem)
     
     html_hemispheres = browser.html
     soup = bs(html_hemispheres, 'html.parser')
+
+    #create list of hemisphere titles
+    items = soup.find_all('div', class_='item')
+
+    #create empty list to hold hemisphere title and image url
+    hemisphere_images = []
+
+    #loop over hemispheres and save the titles and image links
+    for item in items:
+        url_hem = 'https://astrogeology.usgs.gov/search/results?q=hemisphere+enhanced&k1=target&v1=Mars'
+        browser.visit(url_hem)
     
-    title = item.find('h3').text
+        html_hemispheres = browser.html
+        soup = bs(html_hemispheres, 'html.parser')
     
-    #navigate to specific hemisphere page
-    browser.click_link_by_partial_text(title)
-    time.sleep(2)
-
-    html = browser.html
-    soup = bs(html, 'html.parser')
+        title = item.find('h3').text
     
-    #construct link to hemisphere image
-    partial_img_url = soup.find('img', class_='wide-image')['src']
-    img_url = main_url + partial_img_url
+        #navigate to specific hemisphere page
+        browser.click_link_by_partial_text(title)
+        time.sleep(2)
 
-    #append hemisphere title and image url to list
-    hemisphere_images.append({"title":title,"img_url=":img_url})
+        html = browser.html
+        soup = bs(html, 'html.parser')
+    
+        #construct link to hemisphere image
+        partial_img_url = soup.find('img', class_='wide-image')['src']
+        img_url = main_url + partial_img_url
 
+        #append hemisphere title and image url to list
+        hemisphere_images.append({"title":title,"img_url=":img_url})
 
-# In[153]:
+    mars_data['hemisphere_images']=hemisphere_images
 
+    browser.quit()
 
-print(hemisphere_images)
-
-
-# In[ ]:
+    return mars_data
 
 
 
